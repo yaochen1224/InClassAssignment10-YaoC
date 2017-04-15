@@ -10,4 +10,8 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.yaoc.inclassassignment10_yaoc.StorageActivity">
 
+    <ImageView
+        android:id="@+id/storageImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </RelativeLayout>

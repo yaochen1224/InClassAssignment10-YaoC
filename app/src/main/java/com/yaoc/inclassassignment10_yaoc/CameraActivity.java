@@ -1,8 +1,6 @@
 package com.yaoc.inclassassignment10_yaoc;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -20,12 +18,14 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static android.app.Activity.RESULT_OK;
 
 public class CameraActivity extends AppCompatActivity {
 
@@ -92,58 +92,33 @@ public class CameraActivity extends AppCompatActivity {
             return;
 
         if (requestCode == REQUEST_TAKE_PHOTO) {
-            try {
-                fileToUpload = Uri.parse(photoFile.toURI().toString());
-                decodeUri(fileToUpload);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+
+            fileToUpload = Uri.parse(photoFile.toURI().toString());
+
+
         } else if (requestCode == REQUEST_PICK_PHOTO) {
-            try {
-                fileToUpload = data.getData();
-                decodeUri(fileToUpload);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
+
+            fileToUpload = data.getData();
+
         }
-    }
-
-    public void decodeUri(Uri uri) throws FileNotFoundException {
-
-        // Get the dimensions of the View
-        int targetW = imageView.getWidth();
-        int targetH = imageView.getHeight();
-
-        // Get the dimensions of the bitmap
-        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
-        // I just want to know the dimension, don't pass me the pixels yet!
-        bmOptions.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, bmOptions);
-
-        int photoW = bmOptions.outWidth;
-        int photoH = bmOptions.outHeight;
-
-        // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
-
-        // Decode the image file into a Bitmap sized to fill the View
-        bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
-
-        Bitmap image = BitmapFactory.decodeStream(getContentResolver().openInputStream(uri), null, bmOptions);
-        imageView.setImageBitmap(image);
+        Picasso.with(this)
+                .load(fileToUpload).resize(imageView.getWidth(), imageView.getHeight())
+                .centerInside().into(imageView);
         Button upload = (Button)findViewById(R.id.upload);
         upload.setVisibility(View.VISIBLE);
     }
 
-    public void uploadPhoto(View view){
+
+
+
+    public void uploadPhoto(View view) {
         StorageReference riversRef = mStorageRef.child("images/upload.jpg");
 
         riversRef.putFile(fileToUpload)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Toast.makeText(CameraActivity.this,"Upload Successful",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CameraActivity.this, "Upload Successful", Toast.LENGTH_SHORT).show();
                         // Get a URL to the uploaded content
 //                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
                     }
@@ -151,7 +126,7 @@ public class CameraActivity extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
-                        Toast.makeText(CameraActivity.this,"Upload Failed",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CameraActivity.this, "Upload Failed", Toast.LENGTH_SHORT).show();
                         // Handle unsuccessful uploads
                         // ...
                     }
